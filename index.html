@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRIME PANEL</title>
+    
+    <script>
+        // ========== PANEL CONFIGURATION ==========
+        const CONFIG = {
+            // Page Title (appears in browser tab)
+            pageTitle: "PRIME PANEL",
+            
+            // Main Title
+            mainTitle: "PRIME PANEL",
+            
+            // Subtitle/Tagline
+            subtitle: "24 HOURS FREE KEY",
+            
+            // Logo Image URL
+            logoUrl: "https://res.cloudinary.com/dilst4m2x/image/upload/v1763641561/Picsart_25-11-19_09-34-17-374_masa2y.png",
+            
+            // Fallback Logo URL (if main logo fails to load)
+            fallbackLogoUrl: "https://placehold.co/120x120/059669/ffffff?text=PRIME+LOGO",
+            
+            // Username
+            username: "PRIMEPANEL24",
+            
+            // Password
+            password: "90623966",
+            
+            // Footer Text
+            footerText: "Your exclusive access is granted. Please use the credentials above.",
+            
+            // Audio File URL (welcome sound)
+            audioUrl: "https://res.cloudinary.com/dilst4m2x/video/upload/v1763321312/VID-20251015-WA0011_2_t4enz7.mp3",
+            
+            // ========== COLOR THEME ==========
+            colors: {
+                primary: "#4ade80",        // Main green color
+                secondary: "#16a34a",      // Darker green
+                textHighlight: "#fde68a", // Yellow for credentials
+                background: "#000000",     // Black background
+                cardBackground: "rgba(25, 30, 40, 0.95)" // Card background
+            },
+            
+            // ========== 3D PARTICLE SETTINGS (Kept for completeness but unused below) ==========
+            particles: {
+                count: 2000,              // Number of particles
+                size: 3,                  // Particle size
+                color: 0xadd8e6,          // Particle color (hex)
+                speed: 0.0005,            // Rotation speed
+                cameraSpeed: 0.5          // Forward movement speed
+            }
+        };
+        
+        // Update page title
+        document.title = CONFIG.pageTitle;
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': CONFIG.colors.primary,
+                        'secondary': CONFIG.colors.secondary,
+                        'dark-bg': CONFIG.colors.background,
+                        'card-bg': CONFIG.colors.cardBackground,
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'glow-primary': '0 0 15px rgba(74, 222, 128, 0.8)',
+                        'glow-secondary': '0 0 25px rgba(253, 230, 138, 0.6)',
+                        'panel': '0 15px 40px rgba(0, 0, 0, 0.8)',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            color: #f8fafc;
+            /* overflow: hidden; /* Commented out to prevent content being hidden */
+            background-color: #000000;
+        }
+
+        #three-container {
+            /* Hiding the container since Three.js is disabled */
+            display: none; 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        #content-wrapper {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        /* All animations related to Three.js are kept, but won't run without the library */
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        @keyframes glow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(74, 222, 128, 0.4),
+                            0 0 40px rgba(74, 222, 128, 0.2),
+                            0 15px 40px rgba(0, 0, 0, 0.8);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(74, 222, 128, 0.6),
+                            0 0 60px rgba(74, 222, 128, 0.3),
+                            0 15px 50px rgba(0, 0, 0, 0.9);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-10px) rotate(1deg); }
+            66% { transform: translateY(-5px) rotate(-1deg); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        @keyframes borderGlow {
+            0%, 100% { border-color: rgba(74, 222, 128, 0.4); }
+            50% { border-color: rgba(74, 222, 128, 0.8); }
+        }
+
+        @keyframes textGlow {
+            0%, 100% { 
+                text-shadow: 0 0 8px rgba(253, 230, 138, 0.8),
+                            0 0 15px rgba(253, 230, 138, 0.4);
+            }
+            50% { 
+                text-shadow: 0 0 12px rgba(253, 230, 138, 1),
+                            0 0 25px rgba(253, 230, 138, 0.6),
+                            0 0 35px rgba(253, 230, 138, 0.3);
+            }
+        }
+
+        #prime-panel {
+            animation: fadeInScale 1s ease-out forwards, glow 3s ease-in-out infinite;
+            animation-delay: 0.3s, 1.3s;
+            opacity: 0;
+            transition: transform 0.3s ease;
+        }
+
+        #prime-panel:hover {
+            transform: scale(1.02);
+        }
+
+        #prime-panel img {
+            animation: float 6s ease-in-out infinite;
+            animation-delay: 1s;
+        }
+
+        #prime-panel h1 {
+            animation: slideInLeft 0.8s ease-out forwards;
+            animation-delay: 0.5s;
+            opacity: 0;
+            background: linear-gradient(90deg, #fff, #4ade80, #fff);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: slideInLeft 0.8s ease-out forwards, shimmer 3s linear infinite;
+            animation-delay: 0.5s, 1.5s;
+        }
+
+        #prime-panel h2 {
+            animation: slideInRight 0.8s ease-out forwards;
+            animation-delay: 0.7s;
+            opacity: 0;
+        }
+
+        .credential-container {
+            animation: fadeInScale 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .credential-container:nth-child(1) {
+            animation-delay: 0.9s;
+        }
+
+        .credential-container:nth-child(2) {
+            animation-delay: 1.1s;
+        }
+
+        .copy-button {
+            transition: all 0.15s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .copy-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .copy-button:hover::before {
+            left: 100%;
+        }
+
+        .copy-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(74, 222, 128, 0.4);
+        }
+
+        .copy-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+            background-color: #22c55e;
+        }
+
+        .credential-text {
+            animation: textGlow 3s ease-in-out infinite;
+        }
+
+        .credential-field {
+            animation: borderGlow 2s ease-in-out infinite;
+            transition: transform 0.2s ease;
+        }
+
+        .credential-field:hover {
+            transform: translateX(5px);
+        }
+
+        footer {
+            animation: fadeInScale 0.6s ease-out forwards;
+            animation-delay: 1.3s;
+            opacity: 0;
+        }
+
+        #message-box {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+            color: #000;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            box-shadow: 0 10px 25px rgba(74, 222, 128, 0.4);
+            transform: translateX(400px);
+            transition: transform 0.3s ease-out;
+            z-index: 1000;
+        }
+
+        #message-box.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="min-h-full">
+    
+    <div id="three-container"></div>
+
+    <div id="content-wrapper">
+        
+        <div id="prime-panel" class="w-full max-w-md bg-card-bg p-8 md:p-10 rounded-xl shadow-panel border border-primary/40 backdrop-blur-sm">
+            
+            <header class="text-center mb-10">
+                <img 
+                    id="panel-logo"
+                    alt="Prime Panel Logo" 
+                    class="w-28 h-28 mx-auto mb-4 rounded-full border-4 border-primary shadow-glow-primary transition duration-300 hover:scale-[1.05]"
+                >
+                
+                <h1 id="main-title" class="text-5xl font-black text-white tracking-wider mb-1 drop-shadow-lg">
+                </h1>
+                
+                <h2 class="text-xl font-bold text-primary italic">
+                    <span id="subtitle" class="bg-gray-800/50 px-2 py-1 rounded">
+                    </span>
+                </h2>
+            </header>
+
+            <main class="space-y-6">
+                
+                <div class="credential-container space-y-2">
+                    <label for="username-display" class="block text-sm font-medium text-gray-300">USER NAME</label>
+                    <div class="credential-field flex rounded-lg shadow-inner overflow-hidden bg-slate-700/50 border border-primary/50">
+                        <span 
+                            id="username-display" 
+                            class="px-4 py-3 font-mono text-yellow-300 font-extrabold text-xl flex-grow credential-text"
+                            style="white-space: normal;" 
+                        >
+                        </span>
+                        <button 
+                            id="copy-username-btn"
+                            data-label="Username" 
+                            onclick="copyToClipboard(this)" 
+                            class="copy-button bg-primary hover:bg-secondary text-gray-900 font-bold py-3 px-4 flex items-center space-x-2 rounded-r-lg focus:outline-none focus:ring-4 focus:ring-primary/80"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5v2m0 0h8m-8 0h2m-2 2v2m0 0h2m-2 2v2m0 0h2m-2 2v2m0 0h2M18 9h-2m2 0v2m0 0h-2m2 2h-2m2 2h-2m2 2h-2"></path></svg>
+                            <span class="hidden sm:inline">COPY</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="credential-container space-y-2">
+                    <label for="password-display" class="block text-sm font-medium text-gray-300">PASSWORD</label>
+                    <div class="credential-field flex rounded-lg shadow-inner overflow-hidden bg-slate-700/50 border border-primary/50">
+                        <span 
+                            id="password-display" 
+                            class="px-4 py-3 font-mono text-yellow-300 font-extrabold text-xl flex-grow credential-text"
+                            style="white-space: normal;"
+                        >
+                        </span>
+                        <button 
+                            id="copy-password-btn"
+                            data-label="Password" 
+                            onclick="copyToClipboard(this)" 
+                            class="copy-button bg-primary hover:bg-secondary text-gray-900 font-bold py-3 px-4 flex items-center space-x-2 rounded-r-lg focus:outline-none focus:ring-4 focus:ring-primary/80"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2v5l-4-2-4 2V9a2 2 0 012-2h2zm-2 0V5a2 2 0 00-2-2H9a2 2 0 00-2 2v2"></path></svg>
+                            <span class="hidden sm:inline">COPY</span>
+                        </button>
+                    </div>
+                </div>
+                
+            </main>
+
+            <footer class="mt-8 pt-6 border-t border-primary/30 text-center">
+                <p id="footer-text" class="text-xs text-gray-400">
+                </p>
+            </footer>
+
+        </div>
+    </div>
+
+    <div id="message-box" role="status" aria-live="polite"></div>
+
+    <script>
+        // THREE.js functions are commented out since the library is disabled.
+        /*
+        let camera, scene, renderer, particles;
+        const container = document.getElementById('three-container');
+
+        function initThreeJS() {
+            // ... (Three.js setup code)
+        }
+
+        function onWindowResize() {
+            // ... (Three.js resize code)
+        }
+
+        function animate() {
+            // ... (Three.js animation code)
+        }
+
+        function playAudioOnce() {
+            // ... (Audio code)
+        }
+        */
+
+        function initPageContent() {
+            // Set logo
+            const logo = document.getElementById('panel-logo');
+            logo.src = CONFIG.logoUrl;
+            logo.onerror = function() {
+                this.onerror = null;
+                this.src = CONFIG.fallbackLogoUrl;
+            };
+            
+            // Set text content
+            document.getElementById('main-title').textContent = CONFIG.mainTitle;
+            document.getElementById('subtitle').textContent = CONFIG.subtitle;
+            document.getElementById('username-display').textContent = CONFIG.username;
+            document.getElementById('password-display').textContent = CONFIG.password;
+            document.getElementById('footer-text').textContent = CONFIG.footerText;
+            
+            // Set data-value attributes for copy buttons
+            document.getElementById('copy-username-btn').setAttribute('data-value', CONFIG.username);
+            document.getElementById('copy-password-btn').setAttribute('data-value', CONFIG.password);
+            
+            // Set audio source (removed for debugging)
+            // document.getElementById('welcome-audio').src = CONFIG.audioUrl;
+        }
+
+        function copyToClipboard(buttonElement) {
+            const value = buttonElement.getAttribute('data-value');
+            const label = buttonElement.getAttribute('data-label');
+            const messageBox = document.getElementById('message-box');
+
+            const textarea = document.createElement('textarea');
+            textarea.value = value;
+            textarea.style.position = 'fixed'; 
+            textarea.style.opacity = '0'; 
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showMessage(`${label} copied!`, messageBox);
+                } else {
+                    showMessage(`Failed to copy ${label}.`, messageBox);
+                }
+            } catch (err) {
+                console.error('Copy failed:', err);
+                showMessage(`Failed to copy ${label}.`, messageBox);
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function showMessage(message, messageBox) {
+            messageBox.textContent = message;
+            messageBox.classList.add('show');
+
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 2000);
+        }
+
+        window.onload = function() {
+            initPageContent();
+            // initThreeJS(); // Disabled
+            // animate(); // Disabled
+            // playAudioOnce(); // Disabled
+        };
+    </script>
+</body>
+</html>
